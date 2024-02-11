@@ -30,17 +30,27 @@ export function getFontColor(val: number) {
 }
 
 export function getFontSize(val: number) {
-  if (val <= 8) {
-    return "text-6xl";
-  } else if (val <= 64) {
-    return "text-6xl";
+  if (val <= 64) {
+    return "3.75rem";
   } else if (val <= 512) {
-    return "text-5xl";
+    return "3rem";
   } else if (val <= 8192) {
-    return "text-4xl";
+    return "2.25rem";
   } else if (val <= 98304) {
-    return "text-3xl";
+    return "1.875rem";
   } else {
-    return "text-2xl";
+    return "1.5rem";
+  }
+}
+
+export function getLineHeight(val: number) {
+  if (val <= 512) {
+    return "1";
+  } else if (val <= 8192) {
+    return "2.5rem";
+  } else if (val <= 98304) {
+    return "2.25rem";
+  } else {
+    return "2rem";
   }
 }
