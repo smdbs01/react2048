@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 
+import { useSprings, animated } from "react-spring";
+
 import {
   handleLeft,
   handleRight,
@@ -7,7 +9,7 @@ import {
   handleDown,
   resetBoard,
   isGameOver,
-} from "./game";
+} from "./utils/game";
 
 import {
   getBackgroundColor,
@@ -21,10 +23,19 @@ function App() {
   const [score, setScore] = useState(0);
   const [gameState, setGameState] = useState(0); // 0: ready, 1: playing, 2: gameover
 
+  const [cellSprings, api] = useSprings(
+    cells.length,
+    () => ({
+      x: 0,
+      y: 0,
+    }),
+    [cells]
+  );
+
   const handleKeydown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "r") {
-        const newCells = resetBoard();
+        const { newCells, animations } = resetBoard();
         setCells(newCells);
         setScore(0);
         setGameState(1);
@@ -34,15 +45,15 @@ function App() {
       if (gameState === 2) {
         return;
       }
-      let newCells, newScore;
+      let newCells, newScore, animations;
       if (e.key === "ArrowLeft") {
-        ({ newCells, newScore } = handleLeft(cells));
+        ({ newCells, newScore, animations } = handleLeft(cells));
       } else if (e.key === "ArrowRight") {
-        ({ newCells, newScore } = handleRight(cells));
+        ({ newCells, newScore, animations } = handleRight(cells));
       } else if (e.key === "ArrowUp") {
-        ({ newCells, newScore } = handleUp(cells));
+        ({ newCells, newScore, animations } = handleUp(cells));
       } else if (e.key === "ArrowDown") {
-        ({ newCells, newScore } = handleDown(cells));
+        ({ newCells, newScore, animations } = handleDown(cells));
       } else {
         return;
       }
@@ -70,28 +81,43 @@ function App() {
         className="grid grid-cols-4 grid-rows-4 size-2xl justify-around gap-6 rounded-lg p-6"
         style={{ background: "rgb(187, 173, 160)" }}
       >
-        {cells.map((val, i) => (
-          <Cell key={i} val={val} />
+        {cellSprings.map((spring, i) => (
+          <Cell key={i} val={cells[i]} spring={spring} />
         ))}
       </div>
     </div>
   );
 }
 
-function Cell(props: { val: number }) {
+function Cell(props: { val: number; spring?: object }) {
   return (
-    <div
-      className={
-        "flex items-center justify-center rounded-lg text-gray-100 font-bold"
-      }
-      style={{
-        background: getBackgroundColor(props.val),
-        color: getFontColor(props.val),
-        fontSize: getFontSize(props.val),
-        lineHeight: getLineHeight(props.val),
-      }}
-    >
-      <span>{props.val === 0 ? "" : props.val}</span>
+    <div style={{ background: "rgb(205, 193, 180)" }}>
+      {props.val === 0 ? (
+        <div
+          className="size-full rounded-lg"
+          style={{
+            background: getBackgroundColor(0),
+            color: getFontColor(0),
+            fontSize: getFontSize(0),
+            lineHeight: getLineHeight(0),
+          }}
+        ></div>
+      ) : (
+        <animated.div
+          className={
+            "flex items-center justify-center rounded-lg text-gray-100 font-bold size-full"
+          }
+          style={{
+            background: getBackgroundColor(props.val),
+            color: getFontColor(props.val),
+            fontSize: getFontSize(props.val),
+            lineHeight: getLineHeight(props.val),
+            ...props.spring,
+          }}
+        >
+          {props.val === 0 ? "" : props.val}
+        </animated.div>
+      )}
     </div>
   );
 }
